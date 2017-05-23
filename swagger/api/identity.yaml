@@ -1,0 +1,262 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: ASC Identity management API
+  description: "These are the identity management API for any ASC's user.<br> Here a user can be created or updated, get an access token (login) and manage identity properties (e.g. password).<br> Features stateless authentication with JWT, role based authorization (JWT property), password management, facebook authentication."
+host: api.asc.com
+basePath: /v1
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  '/identities':
+    get:
+      description: Retrieves a list of all existing identities
+      responses:
+        '200':
+          description: A list of identities
+          schema:
+            type: array
+            items:
+              $ref: ../models/identity.yaml
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+      security:
+        - jwt:
+          - admins
+          - owner
+    post:
+      description: Creates a new identity
+      parameters:
+        - name: body_identity
+          in: body
+          description: Details of the new identity
+          required: true
+          schema:
+            $ref: ../forms/post.yaml
+      responses:
+        '201':
+          description: The new identity ID
+          headers:
+             location:
+               type: string
+          schema:
+            $ref: ../models/identity.yaml
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+        # free access
+  '/identities/login/basic':
+    post:
+      description: Login a user with email and password
+      parameters:
+        - name: body_login_basic
+          in: body
+          description: Login information
+          required: true
+          schema:
+            $ref: ../forms/login_basic.yaml
+      responses:
+        '200':
+          description: User is authenticated. Returns the JWT, with all the identity selectable data
+          schema:
+            type: string
+        default:
+          description: A generic error occurred
+          schema:
+            $ref: ../models/errors.yaml
+              # free access
+  '/identities/login/facebook':
+    post:
+      description: Login a user with facebook
+      parameters:
+        - name: body_login_facebook
+          in: body
+          description: Login information
+          required: true
+          schema:
+            $ref: ../forms/login_facebook.yaml
+      responses:
+        '200':
+          description: User is authenticated. Returns the JWT, with all the identity selectable data
+          schema:
+            type: string
+        default:
+          description: A generic error occurred
+          schema:
+            $ref: ../models/errors.yaml
+      # free access
+  '/identities/password/change':
+    post:
+      description: Change a user password
+      parameters:
+        - name: body_change_password
+          in: body
+          description: Login and the new password information
+          required: true
+          schema:
+            $ref: ../forms/password_change.yaml
+      responses:
+        '202':
+          description: Password changed
+          schema:
+            type: string
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+        # free access
+  '/identities/password/forgotten':
+    post:
+      description: Send a reset token link to a user
+      parameters:
+        - name: body_forgotten_password
+          in: body
+          description: Email of a registered user
+          required: true
+          schema:
+            $ref: ../forms/password_forgotten.yaml
+      responses:
+        '202':
+          description: Message sent
+          schema:
+            type: string
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+        # free access
+  '/identities/password/reset':
+    post:
+      description: Reset a password from a forgotten token
+      parameters:
+        - name: body_reset_password
+          in: body
+          description: The new password information
+          required: true
+          schema:
+            $ref: ../forms/password_reset.yaml
+      responses:
+        '202':
+          description: Password has been reset
+          schema:
+            type: string
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+        # free access
+  '/identities/confirm': # /identities/confirm?token=###
+    get:
+      description: Confirm an identity email
+      parameters:
+        - name: token
+          in: query
+          description: 'The confirmation token (format: identity _id + 4 digit number)'
+          required: true
+          type: string
+          pattern: "[0-9a-z]{24}[0-9]{4}"
+      responses:
+        '202':
+          description: Identity has been confirmed
+          schema:
+            type: string
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+        # free access
+  '/identities/{id}':
+    get:
+      description: Retrieves an existing identity by ID
+      parameters:
+        - name: id
+          in: path
+          description: ID of the identity to retrieve
+          required: true
+          type: string
+          pattern: "[0-9a-z]{24}"
+      responses:
+        '200':
+          description: A list of the identity by ID
+          schema:
+            $ref: ../models/identity.yaml
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+      security:
+        - jwt:
+          - admins
+          - owner
+    put:
+      description: Updates an existing identity
+      parameters:
+        - name: id
+          in: path
+          description: ID of the identity to update
+          required: true
+          type: string
+        - name: body_identity
+          in: body
+          description: Details of the identity to update to the ASC ecosystem
+          required: true
+          schema:
+            $ref: ../models/identity.yaml
+      responses:
+        '200':
+          description: Update successful
+          schema:
+            $ref: ../models/identity.yaml
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+      security:
+        - jwt:
+          - admins
+          - owner
+    delete:
+      description: Removes an existing identity
+      parameters:
+        - name: id
+          in: path
+          description: ID of the identity to delete
+          required: true
+          type: string
+      responses:
+        '204':
+          description: Delete successful
+          schema:
+            type: string
+        default:
+          description: An error occurred
+          schema:
+            $ref: ../models/errors.yaml
+      security:
+        - jwt:
+          - admins
+          - owner
+securityDefinitions:
+  jwt:
+    description: "Identity token"
+    type: "oauth2"
+    flow: "implicit"
+    authorizationUrl: "/v1/identities/login/basic"
+    scopes:
+      owner: Owner scope
+      admins: Administrators scope
+      users: Regular users scope
+      premium_users: Premium users scope
+      internal_ms: Internal microservices scope
+    x-authorize-owner:
+      _id : _id
+definitions:
+  Identity:
+    $ref: ../models/identity.yaml

@@ -1,0 +1,61 @@
+type: object
+# required:
+# email and password OR facebook token
+properties:
+  _id:
+    description: ObjectID from MongoDB
+    type: string
+    x-swaggering-mongoose:
+      type: ObjectId
+  email:
+    description: User's email
+    type: string
+    format: email
+    minLength: 1
+    maxLength: 45
+  password:
+    description: User's password
+    type: string
+    format: password
+    minLength: 5
+    maxLength: 45
+    x-swaggering-mongoose:
+      select: false
+  status:
+    description: User's status
+    type: string
+    enum:
+      - ACTIVE
+      - PENDING
+    default: PENDING
+    x-swaggering-mongoose:
+      default: PENDING
+  facebookID:
+    description: Facebook ID of the user. Retrieved by the server during identity creation with a Facebook Access Token
+    type: string
+    minLength: 0
+  roles:
+    description: List of roles
+    type: array
+    items:
+      type: string
+      enum:
+        - admins
+        - users
+        - premium_users
+    x-swaggering-mongoose:
+      default:
+        - users
+  # from InstantASP_Users
+  createdAt:
+    type: string
+    format: date
+    minLength: 0
+  updatedAt:
+    type: string
+    format: date
+    minLength: 0
+  lastLoginAt:
+    type: string
+    format: date
+    minLength: 0

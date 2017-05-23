@@ -1,0 +1,11 @@
+{
+  "identities": {
+    "_model": "Identity",
+    "0": {
+      "email": "admin@example.com",
+      "password": "admin123",
+      "roles": ["admins"],
+      "status": "ACTIVE"
+    }
+  }
+}

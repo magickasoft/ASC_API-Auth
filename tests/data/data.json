@@ -1,0 +1,23 @@
+[{
+  "email": "user1@example.com",
+  "password": "secret1"
+}, {
+  "email": "user2@example.com",
+  "password": "secret2"
+}, {
+  "email": "admin@example.com",
+  "password": "secretAdmin",
+  "roles" : [ "admins" ]
+}, {
+  "facebookID": "0123",
+  "facebookAccessToken": "token0123"
+}, {
+  "email": "user4@example.com",
+  "password": "secret4",
+  "__token": 1234
+}, {
+  "email": "user5@example.com",
+  "password": "secret5",
+  "__token": 4321,
+  "status": "ACTIVE"
+}]
